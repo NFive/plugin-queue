@@ -1,0 +1,12 @@
+name: NFive/plugin-queue
+version: 0.1.0
+description: NFive queue plugin
+author: NFive
+license: LGPL
+website: https://nfive.io/
+dependencies:
+  NFive/plugin-sessionmanager: '*'
+
+server:
+  main:
+    - NFive.Queue
