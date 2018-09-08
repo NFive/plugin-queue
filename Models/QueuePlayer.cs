@@ -1,10 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Dynamic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using NFive.Queue.Controllers;
 using NFive.SDK.Core.Models.Player;
 using NFive.SessionManager;
 using NFive.SessionManager.Models;
@@ -13,6 +7,8 @@ namespace NFive.Queue.Models
 {
 	public class QueuePlayer
 	{
+		private byte dots = 0;
+
 		public Client Client { get; set; }
 		public Session Session { get; set; }
 		public Deferrals Deferrals { get; set; }
@@ -20,8 +16,6 @@ namespace NFive.Queue.Models
 		public DateTime JoinTime { get; set; } = DateTime.UtcNow;
 		public ushort JoinCount { get; set; } = 0;
 		public ushort Priority { get; set; } = 100;
-
-		private byte dots = 0;
 
 		public QueuePlayer(Client client, Session session, Deferrals deferrals)
 		{
@@ -38,6 +32,5 @@ namespace NFive.Queue.Models
 		}
 
 		public void Defer() => this.Deferrals.Defer();
-
 	}
 }

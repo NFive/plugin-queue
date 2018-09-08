@@ -3,10 +3,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CitizenFX.Core;
-using CitizenFX.Core.Native;
 using JetBrains.Annotations;
 using NFive.Queue.Models;
-using NFive.SDK.Core.Controllers;
 using NFive.SDK.Core.Diagnostics;
 using NFive.SDK.Core.Models.Player;
 using NFive.SDK.Server.Controllers;
@@ -15,9 +13,8 @@ using NFive.SDK.Server.Rpc;
 using NFive.SessionManager;
 using NFive.SessionManager.Models;
 
-namespace NFive.Queue.Controllers
+namespace NFive.Queue
 {
-
 	[PublicAPI]
 	public class QueueController : ConfigurableController<Configuration>
 	{
