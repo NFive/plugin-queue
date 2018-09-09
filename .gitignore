@@ -2,4 +2,6 @@
 bin/
 obj/
 packages/
+plugins/
 *.user
+*.dll

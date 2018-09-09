@@ -4,10 +4,8 @@ description: NFive queue plugin
 author: NFive
 license: LGPL
 website: https://nfive.io/
-
 server:
   main:
-    - NFive.Queue
-
+  - NFive.Queue
 dependencies:
   NFive/plugin-sessionmanager: '*'

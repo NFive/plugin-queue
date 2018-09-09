@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -37,7 +36,7 @@ namespace NFive.Queue
 			this.thread = Task.Factory.StartNew(ProcessQueue);
 		}
 
-		public async void OnSessionCreated(Client client, Session session, Deferrals deferrals)
+		public void OnSessionCreated(Client client, Session session, Deferrals deferrals)
 		{
 			var queuePlayer = this.queue.Players.SingleOrDefault(p => p.Session.UserId == session.UserId);
 			var cancellationToken = new CancellationTokenSource();
@@ -66,13 +65,13 @@ namespace NFive.Queue
 			this.queue.Threads.Add(queuePlayer, new Tuple<Task, CancellationTokenSource>(Task.Factory.StartNew(() => MonitorPlayer(queuePlayer), cancellationToken.Token), cancellationToken));
 		}
 
-		public async void OnClientInitialized(Client client, Session session)
+		public void OnClientInitialized(Client client, Session session)
 		{
 			this.Logger.Debug($"OnClientInitialized() {client.Name}");
 			this.queue.Players.Remove(this.queue.Players.SingleOrDefault(p => p.Session.UserId == session.UserId));
 		}
 
-		public async void OnClientReconnecting(Client client, Session session, Session oldSession)
+		public void OnClientReconnecting(Client client, Session session, Session oldSession)
 		{
 			this.Logger.Debug($"OnClientReconnecting() {client.Name}");
 			if (oldSession.Connected == null) return;
@@ -83,7 +82,7 @@ namespace NFive.Queue
 			queuePlayer.Allow();
 		}
 
-		public async void OnClientDisconnected(Client client, Session session)
+		public void OnClientDisconnected(Client client, Session session)
 		{
 			var queuePlayer = this.queue.Players.SingleOrDefault(p => p.Session.Id == session.Id);
 			if (queuePlayer == null) return;
