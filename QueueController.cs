@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -46,7 +48,6 @@ namespace NFive.Queue
 			}
 			else
 			{
-				this.Logger.Debug($"Found existing queuePlayer for {client.Name}");
 				queuePlayer.Client = client;
 				queuePlayer.Session = session;
 				queuePlayer.Deferrals = deferrals;
@@ -71,18 +72,21 @@ namespace NFive.Queue
 			this.queue.Players.Remove(this.queue.Players.SingleOrDefault(p => p.Session.UserId == session.UserId));
 		}
 
+		public async void OnClientReconnecting(Client client, Session session, Session oldSession)
 		{
-			this.Logger.Debug($"OnClientReconnected() {client.Name}");
+			this.Logger.Debug($"OnClientReconnecting() {client.Name}");
+			if (oldSession.Connected == null) return;
+			this.Logger.Debug($"Letting reconnected player back in {client.Name}");
+			var queuePlayer = this.queue.Players.Single(p => p.Session.UserId == session.UserId);
+			this.queue.Players.Remove(queuePlayer);
+			this.queue.Players.Insert(0, queuePlayer);
+			queuePlayer.Allow();
 		}
 
 		public async void OnClientDisconnected(Client client, Session session)
 		{
-			this.Logger.Debug($"OnClientDisconnected() {client.Name}");
-			this.Logger.Debug($"Session ID {session.Id}");
-			this.Logger.Debug($"Queue Session IDs {string.Join(", ", this.queue.Players.Select(p => p.Session.Id))}");
 			var queuePlayer = this.queue.Players.SingleOrDefault(p => p.Session.Id == session.Id);
 			if (queuePlayer == null) return;
-			this.Logger.Debug($"Setting queuePlayer to Disconnected: {client.Name}");
 			queuePlayer.Status = QueueStatus.Disconnected;
 		}
 
