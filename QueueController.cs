@@ -19,6 +19,7 @@ namespace NFive.Queue
 	public class QueueController : ConfigurableController<Configuration>
 	{
 		private Models.Queue queue = new Models.Queue();
+		private ushort maxPlayers;
 		private readonly CancellationTokenSource cancellationToken = new CancellationTokenSource();
 		private Task thread;
 
@@ -26,7 +27,10 @@ namespace NFive.Queue
 		{
 			this.Events.On<Client, Session, Deferrals>("sessionCreated", OnSessionCreated);
 			this.Events.On<Client, Session>("clientDisconnected", OnClientDisconnected);
-			this.Events.On<Client, Session, Session>("clientReconnected", OnClientReconnected);
+			this.Events.On<Client, Session, Session>("clientReconnecting", OnClientReconnecting);
+			this.Events.On<Client, Session>("clientInitialized", OnClientInitialized);
+
+			this.maxPlayers = this.Events.Request<ushort>("maxPlayers");
 
 			this.thread = Task.Factory.StartNew(ProcessQueue);
 		}
@@ -61,7 +65,12 @@ namespace NFive.Queue
 			this.queue.Threads.Add(queuePlayer, new Tuple<Task, CancellationTokenSource>(Task.Factory.StartNew(() => MonitorPlayer(queuePlayer), cancellationToken.Token), cancellationToken));
 		}
 
-		public async void OnClientReconnected(Client client, Session session, Session oldSession)
+		public async void OnClientInitialized(Client client, Session session)
+		{
+			this.Logger.Debug($"OnClientInitialized() {client.Name}");
+			this.queue.Players.Remove(this.queue.Players.SingleOrDefault(p => p.Session.UserId == session.UserId));
+		}
+
 		{
 			this.Logger.Debug($"OnClientReconnected() {client.Name}");
 		}
@@ -81,7 +90,18 @@ namespace NFive.Queue
 		{
 			while (!this.cancellationToken.Token.IsCancellationRequested)
 			{
-				await BaseScript.Delay(100);
+				var currentSessions = this.Events.Request<List<Session>>("currentSessions");
+
+				this.Logger.Debug($"Sessions: {currentSessions.Count} | Connected: {currentSessions.Count(s => s.Connected != null)} | In Queue: {this.queue.Players.Count}");
+
+				if (currentSessions.Count(s => s.Connected != null) < this.maxPlayers && this.queue.Players.Count > 0)
+				{
+					this.Logger.Debug($"Letting in player: {this.queue.Players.First().Client.Name}");
+					// There is a slot available, let someone in.
+					this.queue.Players.First().Allow();
+				}
+				
+				await BaseScript.Delay(1000);
 			}
 		}
 

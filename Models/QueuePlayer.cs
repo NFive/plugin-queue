@@ -32,5 +32,7 @@ namespace NFive.Queue.Models
 		}
 
 		public void Defer() => this.Deferrals.Defer();
+
+		public void Allow() => this.Deferrals.Done();
 	}
 }
