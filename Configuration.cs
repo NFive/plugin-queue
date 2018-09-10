@@ -6,7 +6,7 @@ using NFive.SDK.Core.Controllers;
 namespace NFive.Queue
 {
 	[PublicAPI]
-	public class Configuration : IControllerConfiguration
+	public class Configuration : ControllerConfiguration
 	{
 		public List<PriorityPlayer> PriorityPlayers { get; set; } = new List<PriorityPlayer>();
 		public uint DisconnectGrace { get; set; } = 60000;
