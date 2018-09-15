@@ -2,10 +2,12 @@
 using NFive.SDK.Core.Models.Player;
 using NFive.SessionManager;
 using NFive.SessionManager.Models;
+using NFive.SDK.Core.Helpers;
+using NFive.SDK.Core.Models;
 
 namespace NFive.Queue.Models
 {
-	public class QueuePlayer
+	public class QueuePlayer : IdentityModel
 	{
 		private byte dots = 0;
 
@@ -14,11 +16,17 @@ namespace NFive.Queue.Models
 		public Deferrals Deferrals { get; set; }
 		public QueueStatus Status { get; set; } = QueueStatus.Queued;
 		public DateTime JoinTime { get; set; } = DateTime.UtcNow;
-		public ushort JoinCount { get; set; } = 0;
-		public ushort Priority { get; set; } = 100;
+		public short JoinCount { get; set; } = 0;
+		public short Priority { get; set; } = 100;
+
+		public QueuePlayer()
+		{
+			this.Id = GuidGenerator.GenerateTimeBasedGuid();
+		}
 
 		public QueuePlayer(Client client, Session session, Deferrals deferrals)
 		{
+			this.Id = GuidGenerator.GenerateTimeBasedGuid();
 			this.Client = client;
 			this.Session = session;
 			this.Deferrals = deferrals;

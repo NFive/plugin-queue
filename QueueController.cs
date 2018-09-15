@@ -1,11 +1,14 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Data.Entity.Migrations;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CitizenFX.Core;
 using JetBrains.Annotations;
 using NFive.Queue.Models;
+using NFive.Queue.Storage;
 using NFive.SDK.Core.Diagnostics;
 using NFive.SDK.Core.Models.Player;
 using NFive.SDK.Server.Controllers;
@@ -21,8 +24,8 @@ namespace NFive.Queue
 	{
 		private Models.Queue queue = new Models.Queue();
 		private ushort maxPlayers;
-		private readonly CancellationTokenSource cancellationToken = new CancellationTokenSource();
-		private Task thread;
+		private ConcurrentBag<Tuple<Task, CancellationTokenSource>> threads = new ConcurrentBag<Tuple<Task, CancellationTokenSource>>();
+
 
 		public QueueController(ILogger logger, IEventManager events, IRpcHandler rpc, Configuration configuration) : base(logger, events, rpc, configuration)
 		{
@@ -33,7 +36,13 @@ namespace NFive.Queue
 
 			this.maxPlayers = this.Events.Request<ushort>("maxPlayers");
 
-			this.thread = Task.Factory.StartNew(ProcessQueue);
+			StartThread(ProcessQueue, new CancellationTokenSource());
+			StartThread(AutosaveQueue, new CancellationTokenSource());
+		}
+
+		private void StartThread(Func<CancellationTokenSource, Task> task, CancellationTokenSource cts)
+		{
+			this.threads.Add(new Tuple<Task, CancellationTokenSource>(Task.Factory.StartNew(async () => await task(cts)), cts));
 		}
 
 		public void OnSessionCreated(Client client, Session session, Deferrals deferrals)
@@ -82,6 +91,23 @@ namespace NFive.Queue
 			queuePlayer.Allow();
 		}
 
+		public async Task Save()
+		{
+			this.Logger.Debug("Saving current queue.");
+			using (var context = new QueueContext())
+			//using (var transaction = context.Database.BeginTransaction())
+			{
+				var queuePlayers = this.queue.Players.Select((player, index) => new QueuePlayerDto(player, Convert.ToInt16(index))).ToArray();
+				if (queuePlayers.Length == 0) return;
+				this.Logger.Debug($"Saving {queuePlayers.Length} players");
+				context.QueuePlayers.AddOrUpdate(queuePlayers.First());
+				this.Logger.Debug($"Committing save");
+				context.SaveChanges();
+				this.Logger.Debug($"Queue saved");
+				//transaction.Commit();
+			}
+		}
+
 		public void OnClientDisconnected(Client client, Session session)
 		{
 			var queuePlayer = this.queue.Players.SingleOrDefault(p => p.Session.Id == session.Id);
@@ -89,13 +115,13 @@ namespace NFive.Queue
 			queuePlayer.Status = QueueStatus.Disconnected;
 		}
 
-		public async Task ProcessQueue()
+		public async Task ProcessQueue(CancellationTokenSource cancellationTokenSource)
 		{
-			while (!this.cancellationToken.Token.IsCancellationRequested)
+			while (!cancellationTokenSource.Token.IsCancellationRequested)
 			{
 				var currentSessions = this.Events.Request<List<Session>>("currentSessions");
 
-				this.Logger.Debug($"Sessions: {currentSessions.Count} | Connected: {currentSessions.Count(s => s.Connected != null)} | In Queue: {this.queue.Players.Count}");
+				//this.Logger.Debug($"Sessions: {currentSessions.Count} | Connected: {currentSessions.Count(s => s.Connected != null)} | In Queue: {this.queue.Players.Count}");
 
 				if (currentSessions.Count(s => s.Connected != null) < this.maxPlayers && this.queue.Players.Count > 0)
 				{
@@ -105,6 +131,15 @@ namespace NFive.Queue
 				}
 				
 				await BaseScript.Delay(1000);
+			}
+		}
+
+		public async Task AutosaveQueue(CancellationTokenSource cancellationTokenSource)
+		{
+			while (!cancellationTokenSource.Token.IsCancellationRequested)
+			{ 
+				await Save();
+				await BaseScript.Delay(5000);
 			}
 		}
 
