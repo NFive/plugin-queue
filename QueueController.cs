@@ -95,16 +95,16 @@ namespace NFive.Queue
 		{
 			this.Logger.Debug("Saving current queue.");
 			using (var context = new QueueContext())
-			//using (var transaction = context.Database.BeginTransaction())
+			using (var transaction = context.Database.BeginTransaction())
 			{
 				var queuePlayers = this.queue.Players.Select((player, index) => new QueuePlayerDto(player, Convert.ToInt16(index))).ToArray();
 				if (queuePlayers.Length == 0) return;
 				this.Logger.Debug($"Saving {queuePlayers.Length} players");
-				context.QueuePlayers.AddOrUpdate(queuePlayers.First());
+				context.QueuePlayers.AddOrUpdate(queuePlayers);
 				this.Logger.Debug($"Committing save");
 				context.SaveChanges();
 				this.Logger.Debug($"Queue saved");
-				//transaction.Commit();
+				transaction.Commit();
 			}
 		}
 
