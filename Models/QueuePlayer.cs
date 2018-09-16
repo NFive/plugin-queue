@@ -15,8 +15,6 @@ namespace NFive.Queue.Models
 		public Session Session { get; set; }
 		public Deferrals Deferrals { get; set; }
 		public QueueStatus Status { get; set; } = QueueStatus.Queued;
-		public DateTime JoinTime { get; set; } = DateTime.UtcNow;
-		public short JoinCount { get; set; } = 0;
 		public short Priority { get; set; } = 100;
 
 		public QueuePlayer()

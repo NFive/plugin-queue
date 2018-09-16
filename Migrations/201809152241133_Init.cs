@@ -1,5 +1,6 @@
 namespace NFive.Queue.Migrations
 {
+    using System;
     using System.Data.Entity.Migrations;
     
     public partial class Init : DbMigration
@@ -11,9 +12,6 @@ namespace NFive.Queue.Migrations
                 c => new
                     {
                         Id = c.Guid(nullable: false),
-                        Status = c.Int(nullable: false),
-                        JoinTime = c.DateTime(nullable: false, precision: 0),
-                        JoinCount = c.Short(nullable: false),
                         Priority = c.Short(nullable: false),
                         Position = c.Short(nullable: false),
                         SessionId = c.Guid(nullable: false),

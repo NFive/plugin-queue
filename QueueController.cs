@@ -76,15 +76,12 @@ namespace NFive.Queue
 
 		public void OnClientInitialized(Client client, Session session)
 		{
-			this.Logger.Debug($"OnClientInitialized() {client.Name}");
 			this.queue.Players.Remove(this.queue.Players.SingleOrDefault(p => p.Session.UserId == session.UserId));
 		}
 
 		public void OnClientReconnecting(Client client, Session session, Session oldSession)
 		{
-			this.Logger.Debug($"OnClientReconnecting() {client.Name}");
 			if (oldSession.Connected == null) return;
-			this.Logger.Debug($"Letting reconnected player back in {client.Name}");
 			var queuePlayer = this.queue.Players.Single(p => p.Session.UserId == session.UserId);
 			this.queue.Players.Remove(queuePlayer);
 			this.queue.Players.Insert(0, queuePlayer);
@@ -93,17 +90,13 @@ namespace NFive.Queue
 
 		public async Task Save()
 		{
-			this.Logger.Debug("Saving current queue.");
 			using (var context = new QueueContext())
 			using (var transaction = context.Database.BeginTransaction())
 			{
 				var queuePlayers = this.queue.Players.Select((player, index) => new QueuePlayerDto(player, Convert.ToInt16(index))).ToArray();
 				if (queuePlayers.Length == 0) return;
-				this.Logger.Debug($"Saving {queuePlayers.Length} players");
 				context.QueuePlayers.AddOrUpdate(queuePlayers);
-				this.Logger.Debug($"Committing save");
-				context.SaveChanges();
-				this.Logger.Debug($"Queue saved");
+				await context.SaveChangesAsync();
 				transaction.Commit();
 			}
 		}
@@ -121,11 +114,8 @@ namespace NFive.Queue
 			{
 				var currentSessions = this.Events.Request<List<Session>>("currentSessions");
 
-				//this.Logger.Debug($"Sessions: {currentSessions.Count} | Connected: {currentSessions.Count(s => s.Connected != null)} | In Queue: {this.queue.Players.Count}");
-
 				if (currentSessions.Count(s => s.Connected != null) < this.maxPlayers && this.queue.Players.Count > 0)
 				{
-					this.Logger.Debug($"Letting in player: {this.queue.Players.First().Client.Name}");
 					// There is a slot available, let someone in.
 					this.queue.Players.First().Allow();
 				}
