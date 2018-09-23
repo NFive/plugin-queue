@@ -4,6 +4,8 @@
 	{
 		Queued = 0,
 		Disconnected = 1,
-		Connecting = 2
+		Connecting = 2,
+		RestartConnected = 3,
+		RestartQueued = 4
 	}
 }

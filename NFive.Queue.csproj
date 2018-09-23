@@ -82,12 +82,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Configuration.cs" />
-    <Compile Include="Migrations\201809152241133_Init.cs" />
-    <Compile Include="Migrations\201809152241133_Init.Designer.cs">
-      <DependentUpon>201809152241133_Init.cs</DependentUpon>
+    <Compile Include="Migrations\201809230209393_Init.cs" />
+    <Compile Include="Migrations\201809230209393_Init.Designer.cs">
+      <DependentUpon>201809230209393_Init.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
-    <Compile Include="Models\IPlayer.cs" />
     <Compile Include="Models\PriorityPlayer.cs" />
     <Compile Include="Models\Queue.cs" />
     <Compile Include="Models\QueuePlayer.cs" />
@@ -102,8 +101,8 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\201809152241133_Init.resx">
-      <DependentUpon>201809152241133_Init.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\201809230209393_Init.resx">
+      <DependentUpon>201809230209393_Init.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

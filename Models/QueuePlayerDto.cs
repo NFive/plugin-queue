@@ -11,7 +11,7 @@ namespace NFive.Queue.Models
 	public class QueuePlayerDto : IdentityModel
 	{
 		[Required]
-		public short Priority { get; set; } = 100;
+		public int Priority { get; set; } = 100;
 
 		[Required]
 		public short Position { get; set; }
@@ -28,7 +28,7 @@ namespace NFive.Queue.Models
 		public QueuePlayerDto(QueuePlayer queuePlayer, short position)
 		{
 			this.Id = queuePlayer.Id;
-			this.Priority = queuePlayer.Priority;
+			this.Priority = (int)queuePlayer.Priority;
 			this.SessionId = queuePlayer.Session.Id;
 			this.Position = position;
 		}

@@ -1,4 +1,5 @@
 ﻿using System;
+using NFive.Queue.Storage;
 using NFive.SDK.Core.Models.Player;
 using NFive.SessionManager;
 using NFive.SessionManager.Models;
@@ -15,11 +16,18 @@ namespace NFive.Queue.Models
 		public Session Session { get; set; }
 		public Deferrals Deferrals { get; set; }
 		public QueueStatus Status { get; set; } = QueueStatus.Queued;
-		public short Priority { get; set; } = 100;
+		public int Priority { get; set; } = 100; // TODO: Config
 
 		public QueuePlayer()
 		{
 			this.Id = GuidGenerator.GenerateTimeBasedGuid();
+		}
+
+		public QueuePlayer(QueuePlayerDto queuePlayerDto)
+		{
+			this.Id = queuePlayerDto.Id;
+			this.Session = queuePlayerDto.Session;
+			this.Priority = queuePlayerDto.Priority;
 		}
 
 		public QueuePlayer(Client client, Session session, Deferrals deferrals)
@@ -37,8 +45,8 @@ namespace NFive.Queue.Models
 			this.Deferrals.Update("Connecting" + new string('.', this.dots));
 		}
 
-		public void Defer() => this.Deferrals.Defer();
+		public void Defer() => this.Deferrals?.Defer();
 
-		public void Allow() => this.Deferrals.Done();
+		public void Allow() => this.Deferrals?.Done();
 	}
 }
