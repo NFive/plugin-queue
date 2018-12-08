@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using JetBrains.Annotations;
 using NFive.Queue.Models;
 using NFive.SDK.Core.Controllers;
@@ -22,7 +22,7 @@ namespace NFive.Queue
 		/// <value>
 		/// Number of ms a user has to reconnect after disconnected before loosing queue position.
 		/// </value>
-		public uint QueueDisconnectGrace { get; set; } = 60000;
+		public uint DisconnectGrace { get; set; } = 60000;
 
 		/// <summary>
 		/// Gets or sets the pre restart disconnect grace.
