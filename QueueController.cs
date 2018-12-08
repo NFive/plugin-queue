@@ -35,12 +35,12 @@ namespace NFive.Queue
 		{
 			await Load();
 
-			this.Events.On<Client, Session, Deferrals>("sessionCreated", OnSessionCreated);
-			this.Events.On<Client, Session>("clientDisconnected", OnClientDisconnected);
-			this.Events.On<Client, Session, Session>("clientReconnecting", OnClientReconnecting);
-			this.Events.On<Client, Session>("clientInitialized", OnClientInitialized);
+			this.Events.On<Client, Session, Deferrals>(SessionEvents.SessionCreated, OnSessionCreated);
+			this.Events.On<Client, Session>(SessionEvents.ClientDisconnected, OnClientDisconnected);
+			this.Events.On<Client, Session, Session>(SessionEvents.ClientReconnecting, OnClientReconnecting);
+			this.Events.On<Client, Session>(SessionEvents.ClientInitialized, OnClientInitialized);
 
-			this.maxPlayers = this.Events.Request<ushort>("maxPlayers");
+			this.maxPlayers = this.Events.Request<ushort>(SessionEvents.GetMaxPlayers);
 
 			StartThread(ProcessQueue, new CancellationTokenSource());
 			StartThread(AutosaveQueue, new CancellationTokenSource());
@@ -107,7 +107,7 @@ namespace NFive.Queue
 		public async Task Load()
 		{
 			this.Logger.Debug("Load(): Loading old queue from database");
-			var lastServerActiveTime = this.Events.Request<DateTime?>("lastServerActiveTime") ?? DateTime.UtcNow;
+			var lastServerActiveTime = this.Events.Request<DateTime?>(BootEvents.GetLastActiveTime) ?? DateTime.UtcNow;
 			this.Logger.Debug($"Load(): lastServerActiveTime: {lastServerActiveTime}");
 
 			using (var context = new QueueContext())
@@ -187,7 +187,7 @@ namespace NFive.Queue
 				this.queue.Players = this.queue.Players.OrderByDescending(p => p.Priority).ToList();
 
 				// Ask the session manager how many players are currently connected
-				var currentSessions = this.Events.Request<List<Session>>("currentSessions");
+				var currentSessions = this.Events.Request<List<Session>>(SessionEvents.GetCurrentSessions);
 				if (currentSessions.Count(s => s.Connected != null) < this.maxPlayers && this.queue.Players.Count > 0)
 				{
 					// There is a slot available, let someone in.
@@ -210,7 +210,7 @@ namespace NFive.Queue
 		public async Task MonitorPlayer(QueuePlayer queuePlayer, CancellationToken cancellationToken)
 		{
 			this.Logger.Debug($"Starting new thread {Thread.CurrentThread.ManagedThreadId}");
-			var serverBootTime = this.Events.Request<DateTime>("serverBootTime");
+			var serverBootTime = this.Events.Request<DateTime>(BootEvents.GetTime);
 
 			while (!cancellationToken.IsCancellationRequested && queuePlayer.Status == QueueStatus.RestartConnected || queuePlayer.Status == QueueStatus.RestartQueued)
 			{
@@ -239,7 +239,7 @@ namespace NFive.Queue
 			while (!cancellationToken.IsCancellationRequested && queuePlayer.Status == QueueStatus.Disconnected)
 			{
 				await BaseScript.Delay((int)this.Configuration.DeferralDelay);
-				if (DateTime.UtcNow.Subtract(queuePlayer.Session.Disconnected ?? DateTime.UtcNow).TotalMilliseconds < this.Configuration.QueueDisconnectGrace) continue;
+				if (DateTime.UtcNow.Subtract(queuePlayer.Session.Disconnected ?? DateTime.UtcNow).TotalMilliseconds < this.Configuration.DisconnectGrace) continue;
 				this.Logger.Debug($"Thread({Thread.CurrentThread.ManagedThreadId}): Removing player due to expired disconnected grace period: {queuePlayer.Session.User.Name}");
 				this.queue.Players.Remove(queuePlayer);
 				break;

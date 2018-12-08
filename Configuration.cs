@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using JetBrains.Annotations;
 using NFive.Queue.Models;
 using NFive.SDK.Core.Controllers;
