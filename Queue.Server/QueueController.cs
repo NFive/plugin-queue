@@ -1,25 +1,25 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Data.Entity;
 using System.Data.Entity.Migrations;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CitizenFX.Core;
 using JetBrains.Annotations;
-using NFive.Queue.Models;
-using NFive.Queue.Storage;
+using NFive.Queue.Server.Models;
+using NFive.Queue.Server.Storage;
 using NFive.SDK.Core.Diagnostics;
 using NFive.SDK.Core.Helpers;
 using NFive.SDK.Core.Models.Player;
 using NFive.SDK.Server.Controllers;
 using NFive.SDK.Server.Events;
 using NFive.SDK.Server.Rpc;
-using NFive.SessionManager;
-using NFive.SessionManager.Models;
+using NFive.SessionManager.Server;
+using NFive.SessionManager.Server.Models;
+using NFive.SessionManager.Shared;
 
-namespace NFive.Queue
+namespace NFive.Queue.Server
 {
 	[PublicAPI]
 	public class QueueController : ConfigurableController<Configuration>
@@ -110,7 +110,7 @@ namespace NFive.Queue
 			var lastServerActiveTime = this.Events.Request<DateTime?>(BootEvents.GetLastActiveTime) ?? DateTime.UtcNow;
 			this.Logger.Debug($"Load(): lastServerActiveTime: {lastServerActiveTime}");
 
-			using (var context = new QueueContext())
+			using (var context = new StorageContext())
 			{
 				// Players who were connected before the restart
 				var preRestartDisconnectGrace = lastServerActiveTime - TimeSpan.FromMilliseconds(this.Configuration.PreRestartDisconnectGrace);
@@ -161,7 +161,7 @@ namespace NFive.Queue
 
 		public async Task Save()
 		{
-			using (var context = new QueueContext())
+			using (var context = new StorageContext())
 			using (var transaction = context.Database.BeginTransaction())
 			{
 				var queuePlayers = this.queue.Players.Select((player, index) => new QueuePlayerDto(player, Convert.ToInt16(index))).ToArray();
@@ -214,13 +214,13 @@ namespace NFive.Queue
 
 			while (!cancellationToken.IsCancellationRequested && queuePlayer.Status == QueueStatus.RestartConnected || queuePlayer.Status == QueueStatus.RestartQueued)
 			{
-				await BaseScript.Delay((int) this.Configuration.DeferralDelay);
+				await BaseScript.Delay((int)this.Configuration.DeferralDelay);
 				if (queuePlayer.Status == QueueStatus.RestartConnected && DateTime.UtcNow.Subtract(serverBootTime).TotalMilliseconds < this.Configuration.RestartReconnectGrace) continue;
 				if (queuePlayer.Status == QueueStatus.RestartQueued && DateTime.UtcNow.Subtract(serverBootTime).TotalMilliseconds < this.Configuration.RestartRequeueGrace) continue;
 				if (cancellationToken.IsCancellationRequested) return;
 				this.Logger.Debug($"Thread({Thread.CurrentThread.ManagedThreadId}): Removing player due to expired restart grace period: {queuePlayer.Session.User.Name}, Status: {queuePlayer.Status}");
 				queuePlayer.Status = QueueStatus.Disconnected;
-				using (var context = new QueueContext())
+				using (var context = new StorageContext())
 				{
 					context.QueuePlayers.AddOrUpdate(new QueuePlayerDto(queuePlayer, Convert.ToInt16(this.queue.Players.IndexOf(queuePlayer))));
 					await context.SaveChangesAsync();

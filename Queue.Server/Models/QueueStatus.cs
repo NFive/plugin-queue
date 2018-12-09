@@ -1,4 +1,4 @@
-﻿namespace NFive.Queue.Models
+﻿namespace NFive.Queue.Server.Models
 {
 	public enum QueueStatus
 	{

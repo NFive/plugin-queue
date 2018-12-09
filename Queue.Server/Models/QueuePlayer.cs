@@ -1,12 +1,10 @@
-﻿using System;
-using NFive.Queue.Storage;
-using NFive.SDK.Core.Models.Player;
-using NFive.SessionManager;
-using NFive.SessionManager.Models;
-using NFive.SDK.Core.Helpers;
+﻿using NFive.SDK.Core.Helpers;
 using NFive.SDK.Core.Models;
+using NFive.SDK.Core.Models.Player;
+using NFive.SessionManager.Server;
+using NFive.SessionManager.Server.Models;
 
-namespace NFive.Queue.Models
+namespace NFive.Queue.Server.Models
 {
 	public class QueuePlayer : IdentityModel
 	{

@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using JetBrains.Annotations;
-using NFive.Queue.Models;
+using NFive.Queue.Server.Models;
 using NFive.SDK.Core.Controllers;
 
-namespace NFive.Queue
+namespace NFive.Queue.Server
 {
 	[PublicAPI]
 	public class Configuration : ControllerConfiguration

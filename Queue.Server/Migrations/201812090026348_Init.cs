@@ -1,4 +1,4 @@
-namespace NFive.Queue.Migrations
+namespace NFive.Queue.Server.Migrations
 {
     using System;
     using System.Data.Entity.Migrations;
@@ -26,7 +26,7 @@ namespace NFive.Queue.Migrations
         public override void Down()
         {
             DropForeignKey("dbo.QueuePlayers", "SessionId", "dbo.Sessions");
-	        DropIndex("dbo.QueuePlayers", new[] { "SessionId" });
+            DropIndex("dbo.QueuePlayers", new[] { "SessionId" });
             DropTable("dbo.QueuePlayers");
         }
     }

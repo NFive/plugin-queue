@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace NFive.Queue.Models
+namespace NFive.Queue.Server.Models
 {
 	public class Queue
 	{

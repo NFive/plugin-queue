@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 using NFive.SDK.Core.Models;
 using NFive.SDK.Core.Models.Player;
 
-namespace NFive.Queue.Models
+namespace NFive.Queue.Server.Models
 {
 	[Table("QueuePlayers")]
 	public class QueuePlayerDto : IdentityModel
