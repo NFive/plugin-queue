@@ -31,9 +31,9 @@ namespace NFive.Queue.Server
 
 		public QueueController(ILogger logger, IEventManager events, IRpcHandler rpc, Configuration configuration) : base(logger, events, rpc, configuration) => Startup();
 
-		public async Task Startup()
+		public void Startup()
 		{
-			await Load();
+			Load();
 
 			this.Events.On<Client, Session, Deferrals>(SessionEvents.SessionCreated, OnSessionCreated);
 			this.Events.On<Client, Session>(SessionEvents.ClientDisconnected, OnClientDisconnected);
@@ -44,6 +44,7 @@ namespace NFive.Queue.Server
 
 			StartThread(ProcessQueue, new CancellationTokenSource());
 			StartThread(AutosaveQueue, new CancellationTokenSource());
+
 		}
 
 		private void StartThread(Func<CancellationTokenSource, Task> task, CancellationTokenSource cts)
@@ -104,7 +105,7 @@ namespace NFive.Queue.Server
 			queuePlayer.Allow();
 		}
 
-		public async Task Load()
+		public void Load()
 		{
 			this.Logger.Debug("Load(): Loading old queue from database");
 			var lastServerActiveTime = this.Events.Request<DateTime?>(BootEvents.GetLastActiveTime) ?? DateTime.UtcNow;
@@ -138,7 +139,7 @@ namespace NFive.Queue.Server
 					})
 					.OrderByDescending(c => c.Priority);
 
-				foreach (QueuePlayer connectedPlayer in connectedPlayers)
+				foreach (var connectedPlayer in connectedPlayers)
 				{
 					this.Logger.Debug($"Adding previously connected player to queue with priority {connectedPlayer.Priority + this.Configuration.RestartReconnectPriority}: {connectedPlayer.Session.User.Name}");
 					connectedPlayer.Priority += (int)this.Configuration.RestartReconnectPriority;
@@ -148,7 +149,7 @@ namespace NFive.Queue.Server
 					this.queue.Threads.Add(connectedPlayer, new Tuple<Task, CancellationTokenSource>(Task.Factory.StartNew(() => MonitorPlayer(connectedPlayer, cancellationToken.Token), cancellationToken.Token), cancellationToken));
 				}
 
-				foreach (QueuePlayer queuePlayer in queuePlayers)
+				foreach (var queuePlayer in queuePlayers)
 				{
 					this.Logger.Debug($"Adding previously queued player to queue: {queuePlayer.Session.User.Name}");
 					queuePlayer.Status = QueueStatus.RestartQueued;
