@@ -2,7 +2,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using NFive.SDK.Server;
 
-[assembly: ServerPlugin]
+[assembly: ServerPlugin(1)]
 
 [assembly: AssemblyTitle("NFive Queue")]
 [assembly: AssemblyDescription("Player connection queue for NFive servers")]
