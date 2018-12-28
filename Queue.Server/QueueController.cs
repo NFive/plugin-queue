@@ -14,6 +14,7 @@ using NFive.SDK.Core.Helpers;
 using NFive.SDK.Core.Models.Player;
 using NFive.SDK.Server.Controllers;
 using NFive.SDK.Server.Events;
+using NFive.SDK.Server.Rcon;
 using NFive.SDK.Server.Rpc;
 using NFive.SessionManager.Server;
 using NFive.SessionManager.Server.Models;
@@ -27,9 +28,8 @@ namespace NFive.Queue.Server
 		private Models.Queue queue = new Models.Queue();
 		private ushort maxPlayers;
 		private ConcurrentBag<Tuple<Task, CancellationTokenSource>> threads = new ConcurrentBag<Tuple<Task, CancellationTokenSource>>();
-
-
-		public QueueController(ILogger logger, IEventManager events, IRpcHandler rpc, Configuration configuration) : base(logger, events, rpc, configuration) => Startup();
+		
+		public QueueController(ILogger logger, IEventManager events, IRpcHandler rpc, IRconManager rcon, Configuration configuration) : base(logger, events, rpc, rcon, configuration) => Startup();
 
 		public void Startup()
 		{
