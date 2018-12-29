@@ -28,7 +28,7 @@ namespace NFive.Queue.Server.Models
 		public QueuePlayerDto(QueuePlayer queuePlayer, short position)
 		{
 			this.Id = queuePlayer.Id;
-			this.Priority = (int)queuePlayer.Priority;
+			this.Priority = queuePlayer.Priority;
 			this.SessionId = queuePlayer.Session.Id;
 			this.Position = position;
 		}
