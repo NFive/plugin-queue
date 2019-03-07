@@ -1,6 +1,6 @@
+using NFive.SDK.Server;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using NFive.SDK.Server;
 
 [assembly: ServerPlugin(SDK.Version)]
 

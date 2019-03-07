@@ -1,7 +1,7 @@
-using System.Collections.Generic;
 using JetBrains.Annotations;
 using NFive.Queue.Server.Models;
 using NFive.SDK.Core.Controllers;
+using System.Collections.Generic;
 
 namespace NFive.Queue.Server
 {
@@ -60,7 +60,7 @@ namespace NFive.Queue.Server
 		/// Gets or sets the restart requeue grace.
 		/// </summary>
 		/// <value>
-		/// Number of ms a queued player keeps their queue position after restart. 
+		/// Number of ms a queued player keeps their queue position after restart.
 		/// </value>
 		public uint RestartRequeueGrace { get; set; } = 300000;
 

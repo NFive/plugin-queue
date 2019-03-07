@@ -1,9 +1,10 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using JetBrains.Annotations;
 using Newtonsoft.Json;
 using NFive.SDK.Core.Models;
 using NFive.SDK.Core.Models.Player;
+using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NFive.Queue.Server.Models
 {
@@ -23,6 +24,7 @@ namespace NFive.Queue.Server.Models
 		[JsonIgnore]
 		public virtual Session Session { get; set; }
 
+		[UsedImplicitly]
 		public QueuePlayerDto() { }
 
 		public QueuePlayerDto(QueuePlayer queuePlayer, short position)

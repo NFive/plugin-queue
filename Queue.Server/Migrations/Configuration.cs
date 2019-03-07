@@ -1,6 +1,6 @@
 using JetBrains.Annotations;
-using NFive.SDK.Server.Migrations;
 using NFive.Queue.Server.Storage;
+using NFive.SDK.Server.Migrations;
 
 namespace NFive.Queue.Server.Migrations
 {

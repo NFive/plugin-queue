@@ -1,6 +1,6 @@
-using System.Data.Entity;
 using NFive.Queue.Server.Models;
 using NFive.SDK.Server.Storage;
+using System.Data.Entity;
 
 namespace NFive.Queue.Server.Storage
 {

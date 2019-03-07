@@ -41,7 +41,7 @@ namespace NFive.Queue.Server
 			this.maxPlayers = this.Events.Request<ushort>(SessionEvents.GetMaxPlayers);
 
 			StartThread(ProcessQueue, new CancellationTokenSource());
-			StartThread(AutosaveQueue, new CancellationTokenSource());
+			StartThread(AutoSaveQueue, new CancellationTokenSource());
 
 		}
 
@@ -197,7 +197,7 @@ namespace NFive.Queue.Server
 			}
 		}
 
-		public async Task AutosaveQueue(CancellationTokenSource cancellationTokenSource)
+		public async Task AutoSaveQueue(CancellationTokenSource cancellationTokenSource)
 		{
 			while (!cancellationTokenSource.Token.IsCancellationRequested)
 			{

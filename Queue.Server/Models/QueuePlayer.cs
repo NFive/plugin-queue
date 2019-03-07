@@ -1,4 +1,5 @@
-﻿using NFive.SDK.Core.Helpers;
+using JetBrains.Annotations;
+using NFive.SDK.Core.Helpers;
 using NFive.SDK.Core.Models;
 using NFive.SDK.Core.Models.Player;
 using NFive.SDK.Server;
@@ -8,14 +9,19 @@ namespace NFive.Queue.Server.Models
 {
 	public class QueuePlayer : IdentityModel
 	{
-		private byte dots = 0;
+		private byte dots;
 
 		public IClient Client { get; set; }
+
 		public Session Session { get; set; }
+
 		public Deferrals Deferrals { get; set; }
+
 		public QueueStatus Status { get; set; } = QueueStatus.Queued;
+
 		public int Priority { get; set; } = 100; // TODO: Config
 
+		[UsedImplicitly]
 		public QueuePlayer()
 		{
 			this.Id = GuidGenerator.GenerateTimeBasedGuid();
