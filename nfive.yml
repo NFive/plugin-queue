@@ -6,5 +6,3 @@ license: LGPL
 server:
   main:
   - NFive.Queue.Server
-dependencies:
-  NFive/plugin-sessionmanager: '*'

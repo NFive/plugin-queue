@@ -1,8 +1,8 @@
 ﻿using NFive.SDK.Core.Helpers;
 using NFive.SDK.Core.Models;
 using NFive.SDK.Core.Models.Player;
-using NFive.SessionManager.Server;
-using NFive.SessionManager.Server.Models;
+using NFive.SDK.Server;
+using NFive.SDK.Server.Rpc;
 
 namespace NFive.Queue.Server.Models
 {
@@ -10,7 +10,7 @@ namespace NFive.Queue.Server.Models
 	{
 		private byte dots = 0;
 
-		public Client Client { get; set; }
+		public IClient Client { get; set; }
 		public Session Session { get; set; }
 		public Deferrals Deferrals { get; set; }
 		public QueueStatus Status { get; set; } = QueueStatus.Queued;
@@ -28,7 +28,7 @@ namespace NFive.Queue.Server.Models
 			this.Priority = queuePlayerDto.Priority;
 		}
 
-		public QueuePlayer(Client client, Session session, Deferrals deferrals)
+		public QueuePlayer(IClient client, Session session, Deferrals deferrals)
 		{
 			this.Id = GuidGenerator.GenerateTimeBasedGuid();
 			this.Client = client;

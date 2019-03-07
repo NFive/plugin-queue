@@ -1,10 +1,3 @@
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Data.Entity.Migrations;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using CitizenFX.Core;
 using JetBrains.Annotations;
 using NFive.Queue.Server.Models;
@@ -12,13 +5,18 @@ using NFive.Queue.Server.Storage;
 using NFive.SDK.Core.Diagnostics;
 using NFive.SDK.Core.Helpers;
 using NFive.SDK.Core.Models.Player;
+using NFive.SDK.Server;
 using NFive.SDK.Server.Controllers;
 using NFive.SDK.Server.Events;
 using NFive.SDK.Server.Rcon;
 using NFive.SDK.Server.Rpc;
-using NFive.SessionManager.Server;
-using NFive.SessionManager.Server.Models;
-using NFive.SessionManager.Shared;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Data.Entity.Migrations;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace NFive.Queue.Server
 {
@@ -28,17 +26,17 @@ namespace NFive.Queue.Server
 		private Models.Queue queue = new Models.Queue();
 		private ushort maxPlayers;
 		private ConcurrentBag<Tuple<Task, CancellationTokenSource>> threads = new ConcurrentBag<Tuple<Task, CancellationTokenSource>>();
-		
+
 		public QueueController(ILogger logger, IEventManager events, IRpcHandler rpc, IRconManager rcon, Configuration configuration) : base(logger, events, rpc, rcon, configuration) => Startup();
 
 		public void Startup()
 		{
 			Load();
 
-			this.Events.On<Client, Session, Deferrals>(SessionEvents.SessionCreated, OnSessionCreated);
-			this.Events.On<Client, Session>(SessionEvents.ClientDisconnected, OnClientDisconnected);
-			this.Events.On<Client, Session, Session>(SessionEvents.ClientReconnecting, OnClientReconnecting);
-			this.Events.On<Client, Session>(SessionEvents.ClientInitialized, OnClientInitialized);
+			this.Events.On<IClient, Session, Deferrals>(SessionEvents.SessionCreated, OnSessionCreated);
+			this.Events.On<IClient, Session>(SessionEvents.ClientDisconnected, OnClientDisconnected);
+			this.Events.On<IClient, Session, Session>(SessionEvents.ClientReconnecting, OnClientReconnecting);
+			this.Events.On<IClient, Session>(SessionEvents.ClientInitialized, OnClientInitialized);
 
 			this.maxPlayers = this.Events.Request<ushort>(SessionEvents.GetMaxPlayers);
 
@@ -52,7 +50,7 @@ namespace NFive.Queue.Server
 			this.threads.Add(new Tuple<Task, CancellationTokenSource>(Task.Factory.StartNew(async () => await task(cts)), cts));
 		}
 
-		public void OnSessionCreated(Client client, Session session, Deferrals deferrals)
+		public void OnSessionCreated(IClient client, Session session, Deferrals deferrals)
 		{
 			// Check if this is a new or reconnecting queuePlayer
 			var queuePlayer = this.queue.Players.SingleOrDefault(p => p.Session.UserId == session.UserId);
@@ -90,13 +88,13 @@ namespace NFive.Queue.Server
 			this.queue.Threads.Add(queuePlayer, new Tuple<Task, CancellationTokenSource>(Task.Factory.StartNew(() => MonitorPlayer(queuePlayer, cancellationToken.Token), cancellationToken.Token), cancellationToken));
 		}
 
-		public void OnClientInitialized(Client client, Session session)
+		public void OnClientInitialized(IClient client, Session session)
 		{
 			// TODO: Make this option configurable and use the QueueStatus.Connecting with a deadlock timeout
 			this.queue.Players.Remove(this.queue.Players.SingleOrDefault(p => p.Session.UserId == session.UserId));
 		}
 
-		public void OnClientReconnecting(Client client, Session session, Session oldSession)
+		public void OnClientReconnecting(IClient client, Session session, Session oldSession)
 		{
 			if (oldSession.Connected == null) return;
 			var queuePlayer = this.queue.Players.Single(p => p.Session.UserId == session.UserId);
@@ -173,7 +171,7 @@ namespace NFive.Queue.Server
 			}
 		}
 
-		public void OnClientDisconnected(Client client, Session session)
+		public void OnClientDisconnected(IClient client, Session session)
 		{
 			var queuePlayer = this.queue.Players.SingleOrDefault(p => p.Session.Id == session.Id);
 			if (queuePlayer == null) return;
@@ -224,7 +222,7 @@ namespace NFive.Queue.Server
 				using (var context = new StorageContext())
 				{
 					context.QueuePlayers.AddOrUpdate(new QueuePlayerDto(queuePlayer, Convert.ToInt16(this.queue.Players.IndexOf(queuePlayer))));
-					await context.SaveChangesAsync();
+					await context.SaveChangesAsync(cancellationToken);
 				}
 				this.queue.Players.Remove(queuePlayer);
 				this.queue.Threads.Remove(queuePlayer);
