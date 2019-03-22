@@ -88,7 +88,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Configuration.cs" />
-    <Compile Include="Migrations\201903072211354_Init.cs" />
+    <Compile Include="Migrations\201903222351423_Init.cs" />
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\PriorityPlayer.cs" />
     <Compile Include="Models\Queue.cs" />
